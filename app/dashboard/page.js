@@ -94,8 +94,7 @@ export default function DashboardPage() {
             ))}
 
             <div className="hint">
-              Los flujos se guardan como JSON en <code>/data/flows.json</code> (cámbialo a Neon en <code>lib/store.js</code> cuando escales).
-              El link del chat de cada flujo es <code>/chat/&lt;slug&gt;</code> — ese es el que pones de destino en tus anuncios.
+              Los flujos se guardan en <b>Neon</b> (Postgres). El link del chat de cada flujo es <code>/chat/&lt;slug&gt;</code> — ese es el que pones de destino en tus anuncios.
             </div>
           </div>
         )}
