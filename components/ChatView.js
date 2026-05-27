@@ -25,6 +25,7 @@ export default function ChatView({ flow }) {
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
   const [ready, setReady] = useState(false);
+  const [imgErr, setImgErr] = useState(false);
   const playedRef = useRef(new Set());
   const threadRef = useRef();
   const fileRef = useRef();
@@ -161,7 +162,11 @@ export default function ChatView({ flow }) {
   return (
     <div className="wa-screen">
       <header className="wa-header">
-        <div className="wa-avatar">{initial}</div>
+        <div className="wa-avatar">
+          {flow.avatarUrl && !imgErr
+            ? <img className="wa-avatar-img" src={flow.avatarUrl} alt="" onError={() => setImgErr(true)} />
+            : initial}
+        </div>
         <div className="wa-hinfo">
           <div className="wa-name">{flow.name || "Ana"}</div>
           <div className="wa-status">{typing ? "escribiendo…" : "en línea"}</div>

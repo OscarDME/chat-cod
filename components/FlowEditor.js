@@ -35,6 +35,9 @@ export default function FlowEditor({ flow, onSave, onCancel }) {
         </div>
       </div>
 
+      <label className="label">Foto de perfil (URL de la imagen que verá el cliente — la cara de quien le habla)</label>
+      <input className="input" value={f.avatarUrl || ""} onChange={(e) => set("avatarUrl", e.target.value)} placeholder="https://.../ana.jpg" />
+
       <label className="label">Mensajes del guion (en orden). El botón es opcional: si lo pones, el usuario debe tocarlo para avanzar.</label>
       {f.steps.map((s, i) => (
         <div className="step" key={s.id}>
