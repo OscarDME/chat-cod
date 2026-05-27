@@ -4,7 +4,7 @@ import { useEffect } from "react";
 /**
  * Inyecta el Meta Pixel del flujo y dispara PageView ("visitar página")
  * al abrir el chat. El token de CAPI se guarda en el flujo para la Fase 2
- * (eventos server-side); por ahora solo el pixel client-side.
+ * (eventos server-side); por ahora solo el pixel client-side
  */
 export default function MetaPixel({ pixelId }) {
   useEffect(() => {
