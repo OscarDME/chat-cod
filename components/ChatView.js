@@ -5,6 +5,11 @@ import Linkify from "@/components/Linkify";
 const rid = () => Math.random().toString(36).slice(2, 9);
 const now = () => new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 
+function fbqTrack(eventName, data) {
+  if (typeof window === "undefined" || !window.fbq) return;
+  try { window.fbq("track", eventName, data || {}); } catch {}
+}
+
 function getSessionId() {
   if (typeof window === "undefined") return "server";
   try {
@@ -27,6 +32,7 @@ export default function ChatView({ flow }) {
   const [ready, setReady] = useState(false);
   const [imgErr, setImgErr] = useState(false);
   const playedRef = useRef(new Set());
+  const leadFiredRef = useRef(false);
   const threadRef = useRef();
   const fileRef = useRef();
   const sessionId = useRef(null);
@@ -48,6 +54,9 @@ export default function ChatView({ flow }) {
           for (let i = 0; i < (progress.cursor || 0); i++) done.add(i);
           if (progress.awaiting) done.add(progress.cursor || 0);
           playedRef.current = done;
+          // Si en el progreso ya se reprodujo el paso marcado como Lead, no lo dispares de nuevo
+          const leadIdx = flow.steps.findIndex((s) => s.isLeadStep);
+          if (leadIdx >= 0 && done.has(leadIdx)) leadFiredRef.current = true;
         }
       } catch {}
       setReady(true);
@@ -82,6 +91,11 @@ export default function ChatView({ flow }) {
     const t = setTimeout(() => {
       setTyping(false);
       setMessages((m) => [...m, { id: rid(), from: "bot", text: step.text, t: now() }]);
+      // Lead: cuando aparece el mensaje marcado en el editor. Una vez por sesión.
+      if (step.isLeadStep && !leadFiredRef.current) {
+        leadFiredRef.current = true;
+        fbqTrack("Lead", { content_name: flow.name || flow.slug });
+      }
       if (step.button) setAwaiting(step.button);
       else setCursor((c) => c + 1);
     }, Math.min(1600, 500 + step.text.length * 9));
@@ -122,7 +136,7 @@ export default function ChatView({ flow }) {
 
   const onFile = (e) => {
     const file = e.target.files[0]; e.target.value = "";
-    if (!file || busy || phase === "scripted") return;
+    if (!file || busy || phase === "scripted" || phase === "done") return;
     const reader = new FileReader();
     reader.onload = () => {
       const dataUrl = reader.result;
