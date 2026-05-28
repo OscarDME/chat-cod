@@ -116,7 +116,23 @@ a { color: inherit; }
   background-color: var(--wa-bg);
   background-image: radial-gradient(rgba(0,0,0,.022) 1px, transparent 1px);
   background-size: 20px 20px;
+  position: relative;
 }
+.wa-thread-dragging { outline: 3px dashed var(--wa-header); outline-offset: -8px; }
+.wa-dragoverlay {
+  position: sticky; bottom: 0;
+  margin: auto;
+  background: rgba(0, 128, 105, .96);
+  color: #fff;
+  padding: 28px 36px;
+  border-radius: 18px;
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  pointer-events: none;
+  box-shadow: 0 10px 30px rgba(0,0,0,.25);
+  z-index: 5;
+}
+.wa-dragicon { font-size: 52px; line-height: 1; }
+.wa-dragtext { font-size: 17px; font-weight: 700; letter-spacing: .01em; }
 .wa-msg {
   max-width: 78%; width: fit-content;
   padding: 7px 9px 5px 10px;
@@ -161,10 +177,44 @@ a { color: inherit; }
   flex: 1; display: flex; align-items: center; gap: 6px;
   background: #fff; border-radius: 24px; padding: 4px 8px 4px 12px;
 }
-.wa-clip { border: 0; background: transparent; font-size: 19px; cursor: pointer; padding: 6px; line-height: 1; opacity: .65; }
-.wa-clip:hover:not(:disabled) { opacity: 1; }
-.wa-input { flex: 1; border: 0; outline: none; background: transparent; font: inherit; font-size: 16px; padding: 9px 4px; color: var(--wa-text); }
-.wa-clip:disabled, .wa-input:disabled, .wa-send:disabled { opacity: .5; cursor: not-allowed; }
+.wa-attachbar {
+  flex: 0 0 auto;
+  display: flex; align-items: center; gap: 12px;
+  margin: 6px 10px 0;
+  padding: 12px 14px;
+  background: #FFF6E5;
+  border: 1.5px dashed var(--accent);
+  border-radius: 14px;
+  cursor: pointer;
+  transition: .15s;
+  font: inherit;
+  text-align: left;
+  width: calc(100% - 20px);
+  animation: wapop .25s ease;
+}
+.wa-attachbar:hover:not(:disabled) { background: #FFE8C2; border-style: solid; }
+.wa-attachbar:active:not(:disabled) { transform: scale(.99); }
+.wa-attachbar:disabled { opacity: .5; cursor: not-allowed; }
+.wa-attachbar-icon {
+  width: 42px; height: 42px; flex: 0 0 42px;
+  background: var(--accent); color: #fff;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 21px;
+}
+.wa-attachbar-text {
+  flex: 1; min-width: 0;
+  font-weight: 700; font-size: 14.5px; color: #5a3a20;
+  line-height: 1.3;
+}
+.wa-attachbar-text small {
+  display: block; font-weight: 500; font-size: 12.5px; color: #8a7a60; margin-top: 3px;
+}
+.wa-attachbar-arrow {
+  color: var(--accent); font-size: 20px; font-weight: 700; flex: 0 0 auto;
+}
+.wa-input { flex: 1; border: 0; outline: none; background: transparent; font: inherit; font-size: 16px; padding: 9px 12px; color: var(--wa-text); }
+.wa-input:disabled, .wa-send:disabled { opacity: .5; cursor: not-allowed; }
 .wa-send {
   width: 46px; height: 46px; flex: 0 0 46px; border-radius: 50%; border: 0;
   background: var(--wa-header); color: #fff; font-size: 18px; cursor: pointer;

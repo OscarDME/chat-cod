@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import { rid } from "@/lib/flows";
+import { languageOptions } from "@/lib/i18n";
 
 export default function FlowEditor({ flow, onSave, onCancel }) {
   const [f, setF] = useState(flow);
@@ -32,7 +33,9 @@ export default function FlowEditor({ flow, onSave, onCancel }) {
         </div>
         <div style={{ flex: "1 1 120px" }}>
           <label className="label">Idioma</label>
-          <input className="input" value={f.language} onChange={(e) => set("language", e.target.value)} placeholder="polaco / húngaro / eslovaco" />
+          <select className="select" value={f.language || "pl"} onChange={(e) => set("language", e.target.value)}>
+            {languageOptions().map((l) => <option key={l.code} value={l.code}>{l.displayName} ({l.code})</option>)}
+          </select>
         </div>
       </div>
 

@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
 import Linkify from "@/components/Linkify";
+import { t } from "@/lib/i18n";
 
 const rid = () => Math.random().toString(36).slice(2, 9);
 const now = () => new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
@@ -31,6 +32,7 @@ export default function ChatView({ flow }) {
   const [busy, setBusy] = useState(false);
   const [ready, setReady] = useState(false);
   const [imgErr, setImgErr] = useState(false);
+  const [dragging, setDragging] = useState(false);
   const playedRef = useRef(new Set());
   const leadFiredRef = useRef(false);
   const threadRef = useRef();
@@ -122,7 +124,7 @@ export default function ChatView({ flow }) {
       const data = await res.json();
       setMessages((m) => [...m, { id: rid(), from: "bot", text: data.reply || "…", t: now() }]);
     } catch {
-      setMessages((m) => [...m, { id: rid(), from: "bot", text: "⚠️", t: now() }]);
+      setMessages((m) => [...m, { id: rid(), from: "bot", text: L.errorGeneric, t: now() }]);
     } finally { setTyping(false); setBusy(false); }
   }
 
@@ -134,9 +136,9 @@ export default function ChatView({ flow }) {
     anaReply(next);
   };
 
-  const onFile = (e) => {
-    const file = e.target.files[0]; e.target.value = "";
+  const processFile = (file) => {
     if (!file || busy || phase === "scripted" || phase === "done") return;
+    if (!file.type || !file.type.startsWith("image/")) return;
     const reader = new FileReader();
     reader.onload = () => {
       const dataUrl = reader.result;
@@ -146,6 +148,27 @@ export default function ChatView({ flow }) {
       checkComprobante(base64, mediaType);
     };
     reader.readAsDataURL(file);
+  };
+
+  const onFile = (e) => {
+    const file = e.target.files[0]; e.target.value = "";
+    processFile(file);
+  };
+
+  const onDragOver = (e) => {
+    e.preventDefault();
+    if (phase === "scripted" || phase === "done" || busy) return;
+    if (!dragging) setDragging(true);
+  };
+  const onDragLeave = (e) => {
+    e.preventDefault();
+    if (e.currentTarget === e.target) setDragging(false);
+  };
+  const onDrop = (e) => {
+    e.preventDefault();
+    setDragging(false);
+    const file = e.dataTransfer?.files?.[0];
+    processFile(file);
   };
 
   async function checkComprobante(base64, mediaType) {
@@ -159,14 +182,14 @@ export default function ChatView({ flow }) {
       const { looksReal } = await res.json();
       setTyping(false);
       if (looksReal) {
-        setMessages((m) => [...m, { id: rid(), from: "bot", text: flow.bonusMessage || "🎁", t: now() }]);
+        setMessages((m) => [...m, { id: rid(), from: "bot", text: flow.bonusMessage || L.bonusDefault, t: now() }]);
         setPhase("done");
       } else {
-        setMessages((m) => [...m, { id: rid(), from: "bot", text: flow.resendMessage || "¿me reenvías el comprobante? 🙏", t: now() }]);
+        setMessages((m) => [...m, { id: rid(), from: "bot", text: flow.resendMessage || L.resendDefault, t: now() }]);
       }
     } catch {
       setTyping(false);
-      setMessages((m) => [...m, { id: rid(), from: "bot", text: "⚠️", t: now() }]);
+      setMessages((m) => [...m, { id: rid(), from: "bot", text: L.errorGeneric, t: now() }]);
     } finally { setBusy(false); }
   }
 
@@ -183,11 +206,17 @@ export default function ChatView({ flow }) {
         </div>
         <div className="wa-hinfo">
           <div className="wa-name">{flow.name || "Ana"}</div>
-          <div className="wa-status">{typing ? "escribiendo…" : "en línea"}</div>
+          <div className="wa-status">{typing ? t("typing", flow.language) : t("online", flow.language)}</div>
         </div>
       </header>
 
-      <div className="wa-thread" ref={threadRef}>
+      <div
+        className={"wa-thread" + (dragging ? " wa-thread-dragging" : "")}
+        ref={threadRef}
+        onDragOver={onDragOver}
+        onDragLeave={onDragLeave}
+        onDrop={onDrop}
+      >
         {messages.map((m) => (
           <div key={m.id} className={"wa-msg " + (m.from === "user" ? "wa-out" : "wa-in")}>
             {m.kind === "image"
@@ -200,17 +229,37 @@ export default function ChatView({ flow }) {
         {awaiting && !typing && (
           <div className="wa-qreplies"><button className="wa-qbtn" onClick={tapButton}>{awaiting}</button></div>
         )}
+        {dragging && (
+          <div className="wa-dragoverlay">
+            <div className="wa-dragicon">📸</div>
+            <div className="wa-dragtext">{t("dropHere", flow.language)}</div>
+          </div>
+        )}
       </div>
 
+      <input ref={fileRef} type="file" accept="image/*" style={{ display: "none" }} onChange={onFile} />
+
+      {!locked && phase !== "done" && (
+        <button className="wa-attachbar" onClick={() => fileRef.current.click()} disabled={busy}>
+          <div className="wa-attachbar-icon">📸</div>
+          <div className="wa-attachbar-text">
+            {t("attachTitle", flow.language)}
+            <small>
+              {t("attachHintTouch", flow.language)}
+              {typeof window !== "undefined" && !("ontouchstart" in window) ? t("attachHintDesktop", flow.language) : ""}
+            </small>
+          </div>
+          <div className="wa-attachbar-arrow">→</div>
+        </button>
+      )}
+
       <div className="wa-composer">
-        <input ref={fileRef} type="file" accept="image/*" style={{ display: "none" }} onChange={onFile} />
         <div className="wa-inputwrap">
-          <button className="wa-clip" disabled={locked || busy} title="Adjuntar" onClick={() => fileRef.current.click()}>📎</button>
           <input
             className="wa-input"
             value={input}
             disabled={locked || busy}
-            placeholder="Mensaje"
+            placeholder={t("inputPlaceholder", flow.language)}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && send()}
           />
