@@ -8,6 +8,7 @@ export default function TopBar({ active }) {
       </Link>
       <div className="tabs">
         <Link href="/dashboard" className={"tab" + (active === "dashboard" ? " on" : "")}>Dashboard</Link>
+        <Link href="/dashboard/inbox" className={"tab" + (active === "inbox" ? " on" : "")}>Conversaciones</Link>
         <Link href="/chat" className={"tab" + (active === "chat" ? " on" : "")}>Chat</Link>
       </div>
     </div>
