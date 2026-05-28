@@ -175,15 +175,16 @@ function ConvView({ c }) {
         {(c.messages || []).map((m) => (
           <div key={m.id} style={{
             alignSelf: m.from === "user" ? "flex-end" : "flex-start",
-            maxWidth: "78%", background: m.from === "user" ? "var(--user)" : "var(--bot)",
-            color: m.from === "user" ? "#fff" : "var(--ink)",
-            border: m.from === "user" ? "0" : "1px solid var(--line)",
+            maxWidth: "78%",
+            background: m.from === "user" ? "var(--wa-out)" : "var(--wa-in)",
+            color: "var(--wa-text)",
+            border: "1px solid var(--line)",
             padding: "9px 13px", borderRadius: 14, fontSize: 14, lineHeight: 1.45, whiteSpace: "pre-wrap", wordBreak: "break-word",
           }}>
             {m.kind === "image"
               ? <img src={m.img} alt="" style={{ maxWidth: 200, borderRadius: 8, display: "block" }} />
               : m.text}
-            {m.t && <div style={{ fontSize: 10, opacity: 0.6, marginTop: 4, textAlign: "right" }}>{m.t}</div>}
+            {m.t && <div style={{ fontSize: 10, color: "var(--wa-meta)", marginTop: 4, textAlign: "right" }}>{m.t}</div>}
           </div>
         ))}
       </div>
