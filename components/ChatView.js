@@ -171,6 +171,29 @@ export default function ChatView({ flow }) {
     processFile(file);
   };
 
+  // Pegar imagen desde el portapapeles (Ctrl+V / Cmd+V) en cualquier parte de la pantalla
+  const processFileRef = useRef(processFile);
+  useEffect(() => { processFileRef.current = processFile; });
+  useEffect(() => {
+    const onPaste = (e) => {
+      if (phase === "scripted" || phase === "done" || busy) return;
+      const items = e.clipboardData?.items;
+      if (!items) return;
+      for (const item of items) {
+        if (item.type && item.type.startsWith("image/")) {
+          const file = item.getAsFile();
+          if (file) {
+            e.preventDefault();
+            processFileRef.current?.(file);
+            return;
+          }
+        }
+      }
+    };
+    document.addEventListener("paste", onPaste);
+    return () => document.removeEventListener("paste", onPaste);
+  }, [phase, busy]);
+
   async function checkComprobante(base64, mediaType) {
     setTyping(true); setBusy(true);
     try {
