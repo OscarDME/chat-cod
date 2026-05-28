@@ -124,7 +124,7 @@ export default function ChatView({ flow }) {
       const data = await res.json();
       setMessages((m) => [...m, { id: rid(), from: "bot", text: data.reply || "…", t: now() }]);
     } catch {
-      setMessages((m) => [...m, { id: rid(), from: "bot", text: L.errorGeneric, t: now() }]);
+      setMessages((m) => [...m, { id: rid(), from: "bot", text: "⚠️", t: now() }]);
     } finally { setTyping(false); setBusy(false); }
   }
 
@@ -205,14 +205,14 @@ export default function ChatView({ flow }) {
       const { looksReal } = await res.json();
       setTyping(false);
       if (looksReal) {
-        setMessages((m) => [...m, { id: rid(), from: "bot", text: flow.bonusMessage || L.bonusDefault, t: now() }]);
+        setMessages((m) => [...m, { id: rid(), from: "bot", text: flow.bonusMessage || "🎁", t: now() }]);
         setPhase("done");
       } else {
-        setMessages((m) => [...m, { id: rid(), from: "bot", text: flow.resendMessage || L.resendDefault, t: now() }]);
+        setMessages((m) => [...m, { id: rid(), from: "bot", text: flow.resendMessage || "🙏", t: now() }]);
       }
     } catch {
       setTyping(false);
-      setMessages((m) => [...m, { id: rid(), from: "bot", text: L.errorGeneric, t: now() }]);
+      setMessages((m) => [...m, { id: rid(), from: "bot", text: "⚠️", t: now() }]);
     } finally { setBusy(false); }
   }
 
